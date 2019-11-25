@@ -8,14 +8,15 @@ void ASkateboardsGamemode::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (multiplayer)
+    if (playerCount > 1)
     {
-        UGameplayStatics::CreatePlayer(this, -1, true);
-        UGameplayStatics::CreatePlayer(this, -1, true);
-        UGameplayStatics::CreatePlayer(this, -1, true);
+        for (unsigned i{0}; i < playerCount; ++i)
+        {
+            UGameplayStatics::CreatePlayer(this, -1, true);
+        }
     }
     else
     {
-         
+        
     }
 }

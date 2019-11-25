@@ -19,11 +19,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<TSubclassOf<APickupableCpp>> availableObjectiveItems;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	bool multiplayer = true;
-
-	UPROPERTY(EditDefaultOnly, BlueprintReadWrite)
-	unsigned int 
+	UPROPERTY(EditDefaultsOnly)
+	unsigned int playerCount = 3;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
