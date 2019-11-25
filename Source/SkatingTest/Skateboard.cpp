@@ -1,10 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Skateboard.h"
-#include "GameFramework/FloatingPawnMovement.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/InputComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/World.h"
 
 // Sets default values
 ASkateboard::ASkateboard()
@@ -12,29 +15,37 @@ ASkateboard::ASkateboard()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
-	playerCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Player collider"));
-	RootComponent = playerCollider;
-
-	movementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
-
 	skateboard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Skateboard"));
-	skateboard->SetupAttachment(playerCollider);
+	skateboard->SetupAttachment(RootComponent);
+
+	plate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plate"));
+	plate->SetupAttachment(skateboard);
+
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Hallo"))
 }
 
 // Called when the game starts or when spawned
 void ASkateboard::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	playerCollider->SetSimulatePhysics(true);
 
+	if (plate)
+		UE_LOG(LogTemp, Warning, TEXT("Plate created"))
+	else
+		UE_LOG(LogTemp, Warning, TEXT("What"))
+
+	movementComponent = Cast<UCharacterMovementComponent>(GetMovementComponent());
 }
 
 // Called every frame
 void ASkateboard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(plate)
+		plate->SetWorldRotation(FRotator(0, GetActorRotation().Yaw, 0));
 
 }
 
@@ -49,29 +60,47 @@ void ASkateboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ASkateboard::MoveForward(float axis)
 {
-	if (!inAir())
+	if (axis != 0.0f && !movementComponent->IsFalling())
 		AddMovementInput(GetActorForwardVector() * axis);
 }
 
 void ASkateboard::MoveRight(float axis)
 {
-	// AddMovementInput(GetActorRightVector() * axis);
-	auto newVelocity = GetVelocity().RotateAngleAxis(GetVelocity().Size() * axis * TurningStrength, GetActorUpVector());
-	UE_LOG(LogTemp, Warning, TEXT("Old velocity: %s, new Velocity: %s"), *GetVelocity().ToString(), *newVelocity.ToString());
-	playerCollider->SetAllPhysicsLinearVelocity(newVelocity);
-}
+	if (axis == 0.0f) return;
 
-bool ASkateboard::inAir() const
-{
-	FHitResult result;
-	auto start = GetActorLocation();
-	auto end = start + (-GetActorUpVector()) * (playerCollider->GetScaledCapsuleHalfHeight() + 30.f);
-	FCollisionQueryParams collisionParams;
+	auto velocityMagnitude = GetVelocity().Size();
+	if (velocityMagnitude < 1.0f) return;
 
-	if (GetWorld()
-		->LineTraceSingleByChannel(result, start, end, ECollisionChannel::ECC_GameTraceChannel1, collisionParams))
+	auto angle = axis * RotationSpeedFactor * velocityMagnitude;
+	auto rotationVector = UKismetMathLibrary::RotateAngleAxis(GetVelocity(), angle, GetActorUpVector());
+
+	movementComponent->Velocity = rotationVector;
+
+	auto skateBoardWorldRotation = skateboard->GetComponentRotation();
+
+	if (movementComponent->IsFalling())
+	{
+		auto rotation = rotationVector.Rotation();
+		rotation.Pitch = FMath::Clamp(rotation.Pitch, -70.f, 70.f);
+		auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotation, RotateLerping, true);
+		skateboard->SetWorldRotation(newRotation);
+	}
+	else
+	{
+		FHitResult hitResult;
+		auto start = GetActorLocation();
+		auto end = start + (GetActorUpVector() * -(GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + TraceLength));
+
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECollisionChannel::ECC_GameTraceChannel1))
 		{
-			return false;
+			auto cross = FVector::CrossProduct(skateboard->GetForwardVector(), hitResult.Normal);
+			auto otherCross = FVector::CrossProduct(hitResult.Normal, skateboard->GetRightVector());
+			auto rotator = UKismetMathLibrary::MakeRotFromYX(cross, otherCross);
+			rotator.Roll = -rotator.Roll;
+			rotator.Pitch = -rotator.Pitch;
+
+			auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotator, RotateLerping, true);
+			skateboard->SetWorldRotation(newRotation);
 		}
-	return true;
+	}
 }

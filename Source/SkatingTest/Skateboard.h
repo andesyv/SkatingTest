@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 #include "Skateboard.generated.h"
 
-class UFloatingPawnMovement;
 class UCapsuleComponent;
 class UStaticMeshComponent;
+class UCharacterMovementComponent;
 
 UCLASS()
-class SKATINGTEST_API ASkateboard : public APawn
+class SKATINGTEST_API ASkateboard : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -19,23 +19,6 @@ public:
 	// Sets default values for this pawn's properties
 	ASkateboard();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UFloatingPawnMovement* movementComponent = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UCapsuleComponent* playerCollider = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* skateboard = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TurningStrength = 0.0001f;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -46,6 +29,28 @@ public:
 
 	void MoveRight(float axis);
 
-	bool inAir() const;
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* skateboard = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* plate = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TurningStrength = 0.0001f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RotationSpeedFactor = 0.001f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RotateLerping = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TraceLength = 20.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	UCharacterMovementComponent* movementComponent;
 };
