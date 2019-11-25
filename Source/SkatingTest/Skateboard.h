@@ -68,4 +68,5 @@ protected:
 private:
 	FVector GetPosOnTray(int index);
 
+	FVector groundNormal;
 };

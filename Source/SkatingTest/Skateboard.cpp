@@ -57,7 +57,7 @@ void ASkateboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void ASkateboard::MoveForward(float axis)
 {
 	if (axis != 0.0f && !movementComponent->IsFalling())
-		AddMovementInput(GetActorForwardVector() * axis);
+		AddMovementInput(skateboard->GetForwardVector() * axis);
 }
 
 void ASkateboard::MoveRight(float axis)
@@ -74,10 +74,10 @@ void ASkateboard::MoveRight(float axis)
 	movementComponent->Velocity = rotationVector;
 
 	auto skateBoardWorldRotation = skateboard->GetComponentRotation();
+	auto rotation = rotationVector.Rotation();
 
 	if (movementComponent->IsFalling())
 	{
-		auto rotation = rotationVector.Rotation();
 		rotation.Pitch = FMath::Clamp(rotation.Pitch, -70.f, 70.f);
 		auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotation, RotateLerping, true);
 		skateboard->SetWorldRotation(newRotation);
@@ -90,16 +90,20 @@ void ASkateboard::MoveRight(float axis)
 
 		if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECollisionChannel::ECC_GameTraceChannel1))
 		{
-			auto cross = FVector::CrossProduct(skateboard->GetForwardVector(), hitResult.Normal);
+			groundNormal = hitResult.Normal;
+			auto cross = FVector::CrossProduct(skateboard->GetForwardVector(), groundNormal);
 			auto otherCross = FVector::CrossProduct(hitResult.Normal, skateboard->GetRightVector());
 			auto rotator = UKismetMathLibrary::MakeRotFromYX(cross, otherCross);
 			rotator.Roll = -rotator.Roll;
 			rotator.Pitch = -rotator.Pitch;
+			rotator.Yaw = rotation.Yaw;
 
 			auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotator, RotateLerping, true);
 			skateboard->SetWorldRotation(newRotation);
 		}
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Normal is %s"), *groundNormal.ToString());
 }
 
 void ASkateboard::AddToTray(APickupableCpp* pickupable)
