@@ -9,6 +9,8 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 
+#include "PickupableCpp.h"
+
 // Sets default values
 ASkateboard::ASkateboard()
 {
@@ -18,12 +20,9 @@ ASkateboard::ASkateboard()
 	skateboard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Skateboard"));
 	skateboard->SetupAttachment(RootComponent);
 
-	plate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plate"));
-	plate->SetupAttachment(skateboard);
+	Tray = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tray"));
+	Tray->SetupAttachment(skateboard);
 
-
-
-	UE_LOG(LogTemp, Warning, TEXT("Hallo"))
 }
 
 // Called when the game starts or when spawned
@@ -31,10 +30,7 @@ void ASkateboard::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (plate)
-		UE_LOG(LogTemp, Warning, TEXT("Plate created"))
-	else
-		UE_LOG(LogTemp, Warning, TEXT("What"))
+	TrayObjects.Init(nullptr, 6);
 
 	movementComponent = Cast<UCharacterMovementComponent>(GetMovementComponent());
 }
@@ -44,8 +40,8 @@ void ASkateboard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(plate)
-		plate->SetWorldRotation(FRotator(0, GetActorRotation().Yaw, 0));
+	if(Tray)
+		Tray->SetWorldRotation(FRotator(0, GetActorRotation().Yaw, 0));
 
 }
 
@@ -69,6 +65,7 @@ void ASkateboard::MoveRight(float axis)
 	if (axis == 0.0f) return;
 
 	auto velocityMagnitude = GetVelocity().Size();
+
 	if (velocityMagnitude < 1.0f) return;
 
 	auto angle = axis * RotationSpeedFactor * velocityMagnitude;
@@ -103,4 +100,28 @@ void ASkateboard::MoveRight(float axis)
 			skateboard->SetWorldRotation(newRotation);
 		}
 	}
+}
+
+void ASkateboard::AddToTray(APickupableCpp* pickupable)
+{
+	pickupable->SetActorEnableCollision(false);
+	pickupable->AttachToComponent(Tray, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, false));
+
+	if (auto lastPickupable = TrayObjects[LastTrayItem])
+	{
+		lastPickupable->Destroy();
+	}
+
+	TrayObjects[LastTrayItem] = pickupable;
+	pickupable->SetActorLocation(GetPosOnTray(LastTrayItem));
+
+	LastTrayItem = ++LastTrayItem % TrayObjects.Num();
+}
+
+
+FVector ASkateboard::GetPosOnTray(int index)
+{
+	FVector vector{TrayRadius, 0, 0};
+	vector = UKismetMathLibrary::RotateAngleAxis(vector, (TrayObjects.Num() / 360.f) * index, Tray->GetUpVector());
+	return Tray->GetComponentQuat().RotateVector(vector) + Tray->GetComponentLocation();
 }

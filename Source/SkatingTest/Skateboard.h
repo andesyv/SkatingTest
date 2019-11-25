@@ -9,6 +9,7 @@
 class UCapsuleComponent;
 class UStaticMeshComponent;
 class UCharacterMovementComponent;
+class APickupableCpp;
 
 UCLASS()
 class SKATINGTEST_API ASkateboard : public ACharacter
@@ -29,28 +30,42 @@ public:
 
 	void MoveRight(float axis);
 
+	UFUNCTION(BlueprintCallable)
+	void AddToTray(APickupableCpp* pickupable);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* skateboard = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* plate = nullptr;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* Tray = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float TurningStrength = 0.0001f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float RotationSpeedFactor = 0.001f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float RotateLerping = 0.3f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float TraceLength = 20.f;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadOnly)
 	UCharacterMovementComponent* movementComponent;
+
+	UPROPERTY(EditDefaultsOnly)
+	float TrayRadius = 40.f;
+
+	int LastTrayItem = 0;
+
+	TArray<APickupableCpp*> TrayObjects;
+
+private:
+	FVector GetPosOnTray(int index);
+
 };
