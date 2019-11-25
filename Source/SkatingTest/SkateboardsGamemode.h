@@ -8,6 +8,25 @@
 
 class APickupableCpp;
 
+USTRUCT(BlueprintType)
+struct FObjectiveItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString name;
+	UPROPERTY()
+	UClass* objectiveType;
+	UPROPERTY()
+	APickupableCpp* object;
+
+	FObjectiveItem(FString _name = "INVALID", UClass* _type = nullptr, APickupableCpp* _obj = nullptr)
+		: name(_name), objectiveType(_type), object(_obj)
+	{
+
+	}
+};
+
 /**
  * 
  */
@@ -22,7 +41,20 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	unsigned int playerCount = 3;
 
+	UPROPERTY(EditDefaultsOnly)
+	unsigned int objectiveCount = 3;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void setupViewport();
+
+	UFUNCTION(BlueprintPure)
+	TArray<FObjectiveItem> getObjectives() const;
+
+private:
+	void generateObjectives();
+	TArray<FObjectiveItem> objectiveItems{};
 
 };
