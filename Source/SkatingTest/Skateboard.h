@@ -33,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddToTray(APickupableCpp* pickupable);
 
+	UFUNCTION(BlueprintPure)
+	TArray<APickupableCpp*> getTrayObjects();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

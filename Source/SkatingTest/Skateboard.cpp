@@ -129,3 +129,8 @@ FVector ASkateboard::GetPosOnTray(int index)
 	vector = UKismetMathLibrary::RotateAngleAxis(vector, (TrayObjects.Num() / 360.f) * index, Tray->GetUpVector());
 	return Tray->GetComponentQuat().RotateVector(vector) + Tray->GetComponentLocation();
 }
+
+TArray<APickupableCpp*> ASkateboard::getTrayObjects()
+{
+	return TrayObjects;
+}

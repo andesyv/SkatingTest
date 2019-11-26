@@ -9,6 +9,8 @@ void ASkateboardsGamemode::BeginPlay()
 {
     Super::BeginPlay();
 
+    generateObjectives();
+
     if (1 < playerCount)
     {
         for (unsigned i{1}; i < playerCount; ++i)
@@ -24,10 +26,18 @@ void ASkateboardsGamemode::BeginPlay()
 
 void ASkateboardsGamemode::generateObjectives()
 {
-    for (unsigned int i{0}; i < objectiveCount; ++i)
+    objectiveItems.Reserve(objectiveCount);
+    if (0 < availableObjectiveItems.Num())
     {
-        auto obj = availableObjectiveItems[FMath::RandRange(0, availableObjectiveItems.Num())];
-        objectiveItems.Push({obj->GetName(), obj->StaticClass(), nullptr});
+        for (unsigned int i{0}; i < objectiveCount; ++i)
+        {
+            auto obj = availableObjectiveItems[FMath::RandRange(0, availableObjectiveItems.Num() - 1)];
+            objectiveItems.Push({obj->GetDisplayNameText().ToString(), obj->StaticClass(), nullptr});
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No objective items in gamemode!"));
     }
 }
 

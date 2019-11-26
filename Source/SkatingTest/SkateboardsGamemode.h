@@ -13,11 +13,11 @@ struct FObjectiveItem
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString name;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UClass* objectiveType;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APickupableCpp* object;
 
 	FObjectiveItem(FString _name = "INVALID", UClass* _type = nullptr, APickupableCpp* _obj = nullptr)
