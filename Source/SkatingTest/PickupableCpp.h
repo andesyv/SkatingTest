@@ -6,6 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "PickupableCpp.generated.h"
 
+UENUM(BlueprintType)
+enum class EGender : uint8
+{
+	WINE,
+	GRAPE,
+	NONBINARY
+};
+
 UCLASS()
 class SKATINGTEST_API APickupableCpp : public AActor
 {
@@ -14,13 +22,20 @@ class SKATINGTEST_API APickupableCpp : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APickupableCpp();
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly)
+	EGender type{EGender::NONBINARY};
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintPure)
+	EGender getType() const { return type; }
 
 };

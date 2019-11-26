@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "PickupableCpp.h"
 #include "SkateboardsGamemode.generated.h"
-
-class APickupableCpp;
 
 USTRUCT(BlueprintType)
 struct FObjectiveItem
@@ -15,13 +14,15 @@ struct FObjectiveItem
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString name;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UClass* objectiveType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TSubclassOf<class APickupableCpp> objectType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	APickupableCpp* comparisonObject;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APickupableCpp* object;
 
-	FObjectiveItem(FString _name = "INVALID", UClass* _type = nullptr, APickupableCpp* _obj = nullptr)
-		: name(_name), objectiveType(_type), object(_obj)
+	FObjectiveItem(TSubclassOf<class APickupableCpp> _type = {}, FString _name = "INVALID", APickupableCpp* _compObj = nullptr, APickupableCpp* _obj = nullptr)
+		: name(_name), objectType(_type), comparisonObject(_compObj), object(_obj)
 	{
 
 	}
@@ -35,8 +36,8 @@ UCLASS() class SKATINGTEST_API ASkateboardsGamemode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<TSubclassOf<APickupableCpp>> availableObjectiveItems;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<class APickupableCpp>> availableObjectiveItems;
 
 	UPROPERTY(EditDefaultsOnly)
 	unsigned int playerCount = 3;
@@ -56,5 +57,8 @@ public:
 private:
 	void generateObjectives();
 	TArray<FObjectiveItem> objectiveItems{};
+
+private:
+	void spawnDummyObjects();
 
 };
