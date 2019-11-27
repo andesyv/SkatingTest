@@ -13,19 +13,28 @@ struct FObjectiveItem
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString name;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TSubclassOf<class APickupableCpp> objectType;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	APickupableCpp* comparisonObject;
+	FName name;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EGender type;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APickupableCpp* object;
+	bool found;
 
-	FObjectiveItem(TSubclassOf<class APickupableCpp> _type = {}, FString _name = "INVALID", APickupableCpp* _compObj = nullptr, APickupableCpp* _obj = nullptr)
-		: name(_name), objectType(_type), comparisonObject(_compObj), object(_obj)
+	FObjectiveItem(FName _name = "INVALID", EGender _type = EGender::NONBINARY, bool _found = false)
+		: name(_name), type(_type), found(_found)
 	{
 
 	}
+};
+
+USTRUCT(BlueprintType)
+struct FAvailableObjective
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	EGender type;
+	UPROPERTY(EditAnywhere)
+	FName displayName;
 };
 
 /**
@@ -36,8 +45,8 @@ UCLASS() class SKATINGTEST_API ASkateboardsGamemode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<class APickupableCpp>> availableObjectiveItems;
+	UPROPERTY(EditDefaultsOnly)
+	TArray<EGender> availableObjectiveItems;
 
 	UPROPERTY(EditDefaultsOnly)
 	unsigned int playerCount = 3;
@@ -57,8 +66,5 @@ public:
 private:
 	void generateObjectives();
 	TArray<FObjectiveItem> objectiveItems{};
-
-private:
-	void spawnDummyObjects();
 
 };
