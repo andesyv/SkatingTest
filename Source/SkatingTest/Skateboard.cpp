@@ -103,7 +103,7 @@ void ASkateboard::MoveRight(float axis)
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Normal is %s"), *groundNormal.ToString());
+	// UE_LOG(LogTemp, Warning, TEXT("Normal is %s"), *groundNormal.ToString());
 }
 
 void ASkateboard::AddToTray(APickupableCpp* pickupable)
@@ -117,7 +117,11 @@ void ASkateboard::AddToTray(APickupableCpp* pickupable)
 	}
 
 	TrayObjects[LastTrayItem] = pickupable;
-	pickupable->SetActorLocation(GetPosOnTray(LastTrayItem));
+	for (int i{0}; i < TrayObjects.Num(); ++i)
+	{
+		if (IsValid(TrayObjects[i]))
+			TrayObjects[i]->SetActorLocation(GetPosOnTray(i));
+	}
 
 	LastTrayItem = ++LastTrayItem % TrayObjects.Num();
 }
@@ -126,7 +130,7 @@ void ASkateboard::AddToTray(APickupableCpp* pickupable)
 FVector ASkateboard::GetPosOnTray(int index)
 {
 	FVector vector{TrayRadius, 0, 0};
-	vector = UKismetMathLibrary::RotateAngleAxis(vector, (TrayObjects.Num() / 360.f) * index, Tray->GetUpVector());
+	vector = UKismetMathLibrary::RotateAngleAxis(vector, (360.f / TrayObjects.Num()) * index, Tray->GetUpVector());
 	return Tray->GetComponentQuat().RotateVector(vector) + Tray->GetComponentLocation();
 }
 
