@@ -29,6 +29,7 @@ public:
 	void MoveForward(float axis);
 
 	void MoveRight(float axis);
+	void doRotation();
 
 	UFUNCTION(BlueprintCallable)
 	void AddToTray(APickupableCpp* pickupable);
@@ -54,6 +55,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	float RotateLerping = 0.3f;
+
+	FVector rotationVector;
 
 	UPROPERTY(EditDefaultsOnly)
 	float TraceLength = 20.f;

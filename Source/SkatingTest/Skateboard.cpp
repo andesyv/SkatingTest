@@ -44,6 +44,7 @@ void ASkateboard::Tick(float DeltaTime)
 	if(Tray)
 		Tray->SetWorldRotation(FRotator(0, GetActorRotation().Yaw, 0));
 
+	doRotation();
 }
 
 // Called to bind functionality to input
@@ -67,13 +68,18 @@ void ASkateboard::MoveRight(float axis)
 
 	auto velocityMagnitude = GetVelocity().Size();
 
-	if (velocityMagnitude < 1.0f) return;
-
 	auto angle = axis * RotationSpeedFactor * velocityMagnitude;
-	auto rotationVector = UKismetMathLibrary::RotateAngleAxis(GetVelocity(), angle, GetActorUpVector());
+
+	if (velocityMagnitude < 1.0f)
+		return;
+
+	rotationVector = UKismetMathLibrary::RotateAngleAxis(GetVelocity(), angle, GetActorUpVector());
 
 	movementComponent->Velocity = rotationVector;
+}
 
+void ASkateboard::doRotation()
+{
 	auto skateBoardWorldRotation = skateboard->GetComponentRotation();
 	auto rotation = rotationVector.Rotation();
 
@@ -103,8 +109,6 @@ void ASkateboard::MoveRight(float axis)
 			skateboard->SetWorldRotation(newRotation);
 		}
 	}
-
-	// UE_LOG(LogTemp, Warning, TEXT("Normal is %s"), *groundNormal.ToString());
 }
 
 void ASkateboard::AddToTray(APickupableCpp* pickupable)
