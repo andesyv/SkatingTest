@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "RadPlayerController.h"
 
 #include "PickupableCpp.h"
 
@@ -117,13 +118,19 @@ void ASkateboard::AddToTray(APickupableCpp* pickupable)
 	}
 
 	TrayObjects[LastTrayItem] = pickupable;
-	for (int i{0}; i < TrayObjects.Num(); ++i)
-	{
-		if (IsValid(TrayObjects[i]))
-			TrayObjects[i]->SetActorLocation(GetPosOnTray(i));
-	}
+	TrayObjects[LastTrayItem]->SetActorLocation(GetPosOnTray(LastTrayItem));
 
 	LastTrayItem = ++LastTrayItem % TrayObjects.Num();
+
+	auto controller = GetController();
+	if (controller)
+	{
+		auto playercon = Cast<ARadPlayerController>(controller);
+		if (IsValid(playercon))
+		{
+			playercon->UpdateUI();
+		}
+	}
 }
 
 
