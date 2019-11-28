@@ -11,6 +11,7 @@ enum class EGender : uint8
 {
 	WINE,
 	GRAPE,
+	CROWN,
 	NONBINARY
 };
 
