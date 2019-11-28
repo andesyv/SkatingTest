@@ -49,7 +49,11 @@ void ASkateboard::Tick(float DeltaTime)
 		doRotation();
 
 	if(Tray)
-		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw + trayRotation, GetActorRotation().Roll));
+	{
+		if (0.1f < FMath::Abs(lerpingTrayRotation - desiredTrayRotation))
+			lerpingTrayRotation = FMath::Lerp(lerpingTrayRotation, desiredTrayRotation, 0.3f);
+		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw + lerpingTrayRotation, GetActorRotation().Roll));
+	}
 }
 
 // Called to bind functionality to input
@@ -133,8 +137,8 @@ void ASkateboard::ScrollTray(int right)
 {
 	if (gamemode->gameover)
 		return;
-		
-	trayRotation += right * (360.f / TrayObjects.Num());
+
+	desiredTrayRotation += right * (360.f / TrayObjects.Num());
 }
 
 void ASkateboard::AddToTray(APickupableCpp* pickupable)

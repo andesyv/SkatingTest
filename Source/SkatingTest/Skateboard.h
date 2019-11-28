@@ -59,7 +59,8 @@ protected:
 	float RotateLerping = 0.3f;
 
 	FVector rotationVector;
-	float trayRotation = 0.f;
+	float desiredTrayRotation = 0.f;
+	float lerpingTrayRotation = 0.f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float TraceLength = 20.f;
