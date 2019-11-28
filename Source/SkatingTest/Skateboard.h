@@ -10,7 +10,7 @@ class UCapsuleComponent;
 class UStaticMeshComponent;
 class UCharacterMovementComponent;
 class APickupableCpp;
-
+class ASkateboardsGamemode;
 UCLASS()
 class SKATINGTEST_API ASkateboard : public ACharacter
 {
@@ -75,4 +75,6 @@ private:
 	FVector GetPosOnTray(int index);
 
 	FVector groundNormal;
+
+	ASkateboardsGamemode* gamemode;
 };

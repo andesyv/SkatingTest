@@ -7,6 +7,7 @@
 #include "PickupableCpp.h"
 #include "SkateboardsGamemode.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FObjectiveItem
 {
@@ -62,6 +63,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	TArray<FObjectiveItem> getObjectives() const;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool gameover = false;
 
 private:
 	void generateObjectives();
