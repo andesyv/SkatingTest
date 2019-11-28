@@ -42,7 +42,7 @@ void ASkateboard::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if(Tray)
-		Tray->SetWorldRotation(FRotator(0, GetActorRotation().Yaw, 0));
+		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw, GetActorRotation().Roll));
 
 	doRotation();
 }
