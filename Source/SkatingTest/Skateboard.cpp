@@ -42,7 +42,7 @@ void ASkateboard::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if(Tray)
-		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw, GetActorRotation().Roll));
+		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw + trayRotation, GetActorRotation().Roll));
 
 	doRotation();
 }
@@ -54,6 +54,16 @@ void ASkateboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASkateboard::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASkateboard::MoveRight);
+	FInputActionBinding ab("RotateTrayRight", EInputEvent::IE_Pressed);
+	ab.ActionDelegate.GetDelegateForManualSet().BindLambda([&](){
+		ScrollTray(1);
+	});
+	PlayerInputComponent->AddActionBinding(ab);
+	ab = FInputActionBinding{"RotateTrayLeft", EInputEvent::IE_Pressed};
+	ab.ActionDelegate.GetDelegateForManualSet().BindLambda([&](){
+		ScrollTray(-1);
+	});
+	PlayerInputComponent->AddActionBinding(ab);
 }
 
 void ASkateboard::MoveForward(float axis)
@@ -109,6 +119,12 @@ void ASkateboard::doRotation()
 			skateboard->SetWorldRotation(newRotation);
 		}
 	}
+}
+
+void ASkateboard::ScrollTray(int right)
+{
+
+	trayRotation += right * (360.f / TrayObjects.Num());
 }
 
 void ASkateboard::AddToTray(APickupableCpp* pickupable)

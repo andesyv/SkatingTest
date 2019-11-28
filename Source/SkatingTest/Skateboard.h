@@ -31,6 +31,8 @@ public:
 	void MoveRight(float axis);
 	void doRotation();
 
+	void ScrollTray(int right);
+
 	UFUNCTION(BlueprintCallable)
 	void AddToTray(APickupableCpp* pickupable);
 
@@ -57,6 +59,7 @@ protected:
 	float RotateLerping = 0.3f;
 
 	FVector rotationVector;
+	float trayRotation = 0.f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float TraceLength = 20.f;
