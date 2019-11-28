@@ -4,12 +4,14 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "RadPlayerController.h"
-
+#include "SkateboardsGamemode.h"
 #include "PickupableCpp.h"
 
 // Sets default values
@@ -34,12 +36,17 @@ void ASkateboard::BeginPlay()
 	TrayObjects.Init(nullptr, 6);
 
 	movementComponent = Cast<UCharacterMovementComponent>(GetMovementComponent());
+
+	gamemode = Cast<ASkateboardsGamemode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
 void ASkateboard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (!gamemode->gameover)
+		doRotation();
 
 	if(Tray)
 		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw + trayRotation, GetActorRotation().Roll));
@@ -68,13 +75,16 @@ void ASkateboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ASkateboard::MoveForward(float axis)
 {
+	if (gamemode->gameover)
+		return;
+
 	if (axis != 0.0f && !movementComponent->IsFalling())
 		AddMovementInput(skateboard->GetForwardVector() * axis);
 }
 
 void ASkateboard::MoveRight(float axis)
 {
-	if (axis == 0.0f) return;
+	if (axis == 0.0f || gamemode->gameover) return;
 
 	auto velocityMagnitude = GetVelocity().Size();
 
