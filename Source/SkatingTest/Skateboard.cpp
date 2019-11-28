@@ -50,8 +50,6 @@ void ASkateboard::Tick(float DeltaTime)
 
 	if(Tray)
 		Tray->SetWorldRotation(FRotator(GetActorRotation().Pitch, skateboard->GetComponentRotation().Yaw + trayRotation, GetActorRotation().Roll));
-
-	doRotation();
 }
 
 // Called to bind functionality to input
@@ -133,7 +131,9 @@ void ASkateboard::doRotation()
 
 void ASkateboard::ScrollTray(int right)
 {
-
+	if (gamemode->gameover)
+		return;
+		
 	trayRotation += right * (360.f / TrayObjects.Num());
 }
 
