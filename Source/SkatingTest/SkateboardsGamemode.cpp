@@ -44,6 +44,10 @@ void ASkateboardsGamemode::generateObjectives()
                 break;
                 case EGender::CROWN:
                 name = "Kings crown";
+                break;
+                case EGender::CHICKEN:
+                name = "Chicken";
+                break;
                 default:
                 name = "INVALID";
                 break;

@@ -150,6 +150,7 @@ void ASkateboard::ScrollTray(int right)
 void ASkateboard::AddToTray(APickupableCpp* pickupable)
 {
 	pickupable->SetActorEnableCollision(false);
+	pickupable->object->SetSimulatePhysics(false);
 	pickupable->AttachToComponent(Tray, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, false));
 
 	if (auto lastPickupable = TrayObjects[LastTrayItem])
@@ -191,12 +192,22 @@ void ASkateboard::YeetFromTray(int index)
 	auto yeetedThingy = GetWorld()->SpawnActor<APickupableCpp>(TrayObjects[index]->GetClass(), spawnTrans, spawnParams);
 	if (yeetedThingy)
 	{
-		yeetedThingy->object->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		yeetedThingy->SetActorEnableCollision(true);
 		yeetedThingy->object->SetSimulatePhysics(true);
-		yeetedThingy->object->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		yeetedThingy->object->AddImpulse(yeetingArrow->GetForwardVector() * YeetingForce);
 	}
 	TrayObjects[index]->Destroy();
+	TrayObjects[index] = nullptr;
+
+		auto controller = GetController();
+	if (controller)
+	{
+		auto playercon = Cast<ARadPlayerController>(controller);
+		if (IsValid(playercon))
+		{
+			playercon->UpdateUI();
+		}
+	}
 }
 
 void ASkateboard::YeetCurrent()
