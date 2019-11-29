@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "PickupableCpp.generated.h"
 
+class UStaticMeshComponent;
+class UBoxComponent;
+
 UENUM(BlueprintType)
 enum class EGender : uint8
 {
@@ -23,6 +26,12 @@ class SKATINGTEST_API APickupableCpp : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APickupableCpp();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* object = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UBoxComponent* pickupZone = nullptr;
 	
 
 protected:
@@ -35,6 +44,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintPure)
 	EGender getType() const { return type; }

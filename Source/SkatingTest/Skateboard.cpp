@@ -13,6 +13,7 @@
 #include "RadPlayerController.h"
 #include "SkateboardsGamemode.h"
 #include "PickupableCpp.h"
+#include "Components/ArrowComponent.h"
 
 // Sets default values
 ASkateboard::ASkateboard()
@@ -26,6 +27,9 @@ ASkateboard::ASkateboard()
 	Tray = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tray"));
 	Tray->SetupAttachment(skateboard);
 
+
+	yeetingArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("YeetingDirection"));
+	yeetingArrow->SetupAttachment(skateboard);
 }
 
 // Called when the game starts or when spawned
@@ -73,6 +77,7 @@ void ASkateboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		ScrollTray(-1);
 	});
 	PlayerInputComponent->AddActionBinding(ab);
+	PlayerInputComponent->BindAction("YeetItem", EInputEvent::IE_Pressed, this, &ASkateboard::YeetCurrent);
 }
 
 void ASkateboard::MoveForward(float axis)
@@ -138,7 +143,8 @@ void ASkateboard::ScrollTray(int right)
 	if (gamemode->gameover)
 		return;
 
-	desiredTrayRotation += right * (360.f / TrayObjects.Num());
+	desiredTrayRotation -= right * (360.f / TrayObjects.Num());
+	CurrentTrayItem = (CurrentTrayItem + right) % TrayObjects.Num();
 }
 
 void ASkateboard::AddToTray(APickupableCpp* pickupable)
@@ -175,7 +181,30 @@ FVector ASkateboard::GetPosOnTray(int index)
 	return Tray->GetComponentQuat().RotateVector(vector) + Tray->GetComponentLocation();
 }
 
-TArray<APickupableCpp*> ASkateboard::getTrayObjects()
+void ASkateboard::YeetFromTray(int index)
+{
+	if (index < 0 || TrayObjects.Num() <= index || !IsValid(TrayObjects[index]))
+		return;
+
+	FTransform spawnTrans{FRotator::ZeroRotator, GetActorLocation() + skateboard->GetForwardVector() * 100.f};
+	FActorSpawnParameters spawnParams;
+	auto yeetedThingy = GetWorld()->SpawnActor<APickupableCpp>(TrayObjects[index]->GetClass(), spawnTrans, spawnParams);
+	if (yeetedThingy)
+	{
+		yeetedThingy->object->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		yeetedThingy->object->SetSimulatePhysics(true);
+		yeetedThingy->object->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		yeetedThingy->object->AddImpulse(yeetingArrow->GetForwardVector() * YeetingForce);
+	}
+	TrayObjects[index]->Destroy();
+}
+
+void ASkateboard::YeetCurrent()
+{
+	YeetFromTray(CurrentTrayItem);
+}
+
+TArray<APickupableCpp *> ASkateboard::getTrayObjects()
 {
 	return TrayObjects;
 }

@@ -11,6 +11,8 @@ class UStaticMeshComponent;
 class UCharacterMovementComponent;
 class APickupableCpp;
 class ASkateboardsGamemode;
+class UArrowComponent;
+
 UCLASS()
 class SKATINGTEST_API ASkateboard : public ACharacter
 {
@@ -36,6 +38,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddToTray(APickupableCpp* pickupable);
 
+	UFUNCTION(BlueprintCallable)
+	void YeetFromTray(int i);
+	
+	UFUNCTION(BlueprintCallable)
+	void YeetCurrent();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float YeetingForce = 1000.f;
+
 	UFUNCTION(BlueprintPure)
 	TArray<APickupableCpp*> getTrayObjects();
 
@@ -48,6 +59,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Tray = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UArrowComponent* yeetingArrow = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
 	float TurningStrength = 0.0001f;
@@ -72,6 +86,7 @@ protected:
 	float TrayRadius = 40.f;
 
 	int LastTrayItem = 0;
+	int CurrentTrayItem = 0;
 
 	TArray<APickupableCpp*> TrayObjects;
 
