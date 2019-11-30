@@ -72,7 +72,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float RotateLerping = 0.3f;
 
-	FVector rotationVector;
+	UPROPERTY(EditDefaultsOnly)
+	float FreeRotationThreshold = 50.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float FreeRotationSpeedFactor = 8.f;
+
+	FVector rotationVector{FVector::ForwardVector};
 	float desiredTrayRotation = 0.f;
 	float lerpingTrayRotation = 0.f;
 
@@ -94,6 +100,7 @@ private:
 	FVector GetPosOnTray(int index);
 
 	FVector groundNormal;
+	FVector targetDirection{FVector::ForwardVector};
 
 	ASkateboardsGamemode* gamemode;
 };

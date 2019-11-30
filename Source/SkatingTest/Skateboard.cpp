@@ -85,8 +85,9 @@ void ASkateboard::MoveForward(float axis)
 	if (gamemode->gameover)
 		return;
 
-	if (axis != 0.0f && !movementComponent->IsFalling())
-		AddMovementInput(skateboard->GetForwardVector() * axis);
+	if (!(FVector::DotProduct(GetVelocity(), skateboard->GetForwardVector()) < 0 && axis < 0))
+		if (axis != 0.0f && !movementComponent->IsFalling())
+			AddMovementInput(skateboard->GetForwardVector() * axis);
 }
 
 void ASkateboard::MoveRight(float axis)
@@ -95,14 +96,30 @@ void ASkateboard::MoveRight(float axis)
 
 	auto velocityMagnitude = GetVelocity().Size();
 
-	auto angle = axis * RotationSpeedFactor * velocityMagnitude;
+	// // Standstill rotation
+	// if (velocityMagnitude < FreeRotationThreshold)
+	// {
+		
+	// 	// skateboard->GetForwardVector()
+	// 	// targetDirection
+	// 	auto angle = axis * FreeRotationSpeedFactor;
+	// 	rotationVector = UKismetMathLibrary::RotateAngleAxis(rotationVector, angle, GetActorUpVector());
+	// }
+	// // Speedy rotation
+	// else
+	// {
+		auto freerotationFactor = (FreeRotationThreshold - velocityMagnitude < 0) ? 0 : FreeRotationSpeedFactor * (FreeRotationThreshold - velocityMagnitude) / FreeRotationThreshold;
+		auto angle = axis * (RotationSpeedFactor * velocityMagnitude + freerotationFactor);
+		// auto angle = axis * FreeRotationSpeedFactor;
 
-	if (velocityMagnitude < 1.0f)
-		return;
+		if (velocityMagnitude < 1.0f) return;
 
-	rotationVector = UKismetMathLibrary::RotateAngleAxis(GetVelocity(), angle, GetActorUpVector());
+		rotationVector = UKismetMathLibrary::RotateAngleAxis(rotationVector, angle, GetActorUpVector());
+		// targetDirection = UKismetMathLibrary::RotateAngleAxis(targetDirection, angle, GetActorUpVector());
 
-	movementComponent->Velocity = rotationVector;
+		auto newVelocity = FVector{rotationVector.X, rotationVector.Y, rotationVector.Z + GetVelocity().GetSafeNormal().Z} * velocityMagnitude;
+		movementComponent->Velocity = newVelocity;
+		// }
 }
 
 void ASkateboard::doRotation()
@@ -110,12 +127,19 @@ void ASkateboard::doRotation()
 	auto skateBoardWorldRotation = skateboard->GetComponentRotation();
 	auto rotation = rotationVector.Rotation();
 
+	// Falling skateboard movement
 	if (movementComponent->IsFalling())
 	{
 		rotation.Pitch = FMath::Clamp(rotation.Pitch, -70.f, 70.f);
 		auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotation, RotateLerping, true);
 		skateboard->SetWorldRotation(newRotation);
 	}
+	// // Standstill skateboard movement
+	// else if (GetVelocity().Size() < FreeRotationThreshold)
+	// {
+	// 	FreeRotationSpeedFactor
+	// }
+	// Moving skateboard movement
 	else
 	{
 		FHitResult hitResult;
