@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PickupableCpp.h"
 #include "Engine/World.h"
+#include "SkateboardGameInstance.h"
 
 void ASkateboardsGamemode::BeginPlay()
 {
@@ -12,17 +13,49 @@ void ASkateboardsGamemode::BeginPlay()
 
     generateObjectives();
 
+	auto instance = Cast<USkateboardGameInstance>(GetGameInstance());
+	if (!instance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Wrong game instance setup!"))
+		return;
+	}
+
+	playerCount = instance->numPlayers;
+
     if (1 < playerCount)
     {
         for (unsigned i{1}; i < playerCount; ++i)
         {
-            UGameplayStatics::CreatePlayer(this, -1, true);
+           auto playerController =  UGameplayStatics::CreatePlayer(this, -1, true);
+		   playerController->SetInputMode(FInputModeGameOnly());
         }
     }
+
+	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	playerController->SetInputMode(FInputModeGameOnly());
+	playerController->SetTickableWhenPaused(true);
 
     setupViewport();
 
 
+}
+
+void ASkateboardsGamemode::pauseGame()
+{
+	gamePaused = true;
+	UGameplayStatics::SetGamePaused(GetWorld(), gamePaused);
+	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	playerController->bShowMouseCursor = true;
+	playerController->SetInputMode(FInputModeUIOnly());
+}
+
+void ASkateboardsGamemode::unPauseGame()
+{
+	gamePaused = false;
+	UGameplayStatics::SetGamePaused(GetWorld(), gamePaused);
+	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	playerController->bShowMouseCursor = false;
+	playerController->SetInputMode(FInputModeGameOnly());
 }
 
 void ASkateboardsGamemode::generateObjectives()

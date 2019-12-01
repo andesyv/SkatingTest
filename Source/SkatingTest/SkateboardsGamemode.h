@@ -67,6 +67,15 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool gameover = false;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool gamePaused = false;
+
+	UFUNCTION(BlueprintCallable)
+	void pauseGame();
+
+	UFUNCTION(BlueprintCallable)
+	void unPauseGame();
+
 private:
 	void generateObjectives();
 	TArray<FObjectiveItem> objectiveItems{};
