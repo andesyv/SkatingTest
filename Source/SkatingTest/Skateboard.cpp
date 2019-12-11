@@ -14,6 +14,7 @@
 #include "SkateboardsGamemode.h"
 #include "PickupableCpp.h"
 #include "Components/ArrowComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 ASkateboard::ASkateboard()
@@ -133,6 +134,7 @@ void ASkateboard::doRotation()
 		rotation.Pitch = FMath::Clamp(rotation.Pitch, -70.f, 70.f);
 		auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotation, RotateLerping, true);
 		skateboard->SetWorldRotation(newRotation);
+		GetMesh()->SetWorldRotation(newRotation);
 	}
 	// // Standstill skateboard movement
 	// else if (GetVelocity().Size() < FreeRotationThreshold)
@@ -158,6 +160,7 @@ void ASkateboard::doRotation()
 
 			auto newRotation = UKismetMathLibrary::RLerp(skateBoardWorldRotation, rotator, RotateLerping, true);
 			skateboard->SetWorldRotation(newRotation);
+			GetMesh()->SetWorldRotation(newRotation);
 		}
 	}
 }
